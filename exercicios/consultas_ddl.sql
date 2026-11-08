@@ -7,7 +7,7 @@ CREATE TABLE Pessoas (
     endereco varchar(300) NOT NULL,
     telefone varchar(15) NULL,
     CONSTRAINT pessoa_pk PRIMARY KEY (cpf),
-    CONSTRAINT email_nome_uniquegroup Unique(email, nome)
+    CONSTRAINT pessoa_un Unique(email, nome)
 );
 
 
@@ -15,8 +15,8 @@ CREATE TABLE Pessoas (
 CREATE TABLE Pacientes (
     cpf_pessoa char(11) NOT NULL,
     senha varchar(20) NOT NULL,
-    plano_saude boolean NOT NULL DEFAULT 0,
-    CONSTRAINT cpf_pessoa_fk FOREIGN KEY (cpf_pessoa) REFERENCES Pessoa(cpf) ON DELETE CASCADE,
+    plano_saude boolean NOT NULL DEFAULT FALSE,
+    CONSTRAINT cpf_pessoa_fk FOREIGN KEY (cpf_pessoa) REFERENCES Pessoas(cpf) ON DELETE CASCADE,
     CONSTRAINT cpf_pessoa_pk PRIMARY KEY (cpf_pessoa)
 );
 
@@ -25,7 +25,7 @@ CREATE TABLE Pacientes (
 CREATE TABLE Medicos (
     cpf_pessoa char(11) NOT NULL,
     crm varchar(10) NOT NULL UNIQUE,
-    CONSTRAINT cpf_pessoa_fk FOREIGN KEY (cpf_pessoa) REFERENCES Pessoa(cpf) ON DELETE CASCADE,
+    CONSTRAINT cpf_pessoa_fk FOREIGN KEY (cpf_pessoa) REFERENCES Pessoas(cpf) ON DELETE CASCADE,
     CONSTRAINT cpf_pessoa_pk PRIMARY KEY (cpf_pessoa)
 );
 
@@ -34,13 +34,12 @@ CREATE TABLE Medicos (
 CREATE TABLE Agendamentos (
     cpf_paciente char(11) NOT NULL,
     cpf_medico char(11) NOT NULL,
-    dh_consulta timestamp NULL,
-    dh_agendamento datetime NOT NULL,
+    dh_consulta timestamp NOT NULL,
+    dh_agendamento timestamp NOT NULL DEFAULT current_timestamp,
     valor_consulta decimal(10, 2) NOT NULL DEFAULT(0.0),
     CONSTRAINT cpf_paciente_fk FOREIGN KEY (cpf_paciente) REFERENCES Pacientes(cpf_pessoa),
     CONSTRAINT cpf_medico_fk FOREIGN KEY (cpf_medico) REFERENCES Medicos(cpf_pessoa),
-    CONSTRAINT cpf_paciente_pk PRIMARY KEY (cpf_paciente),
-    CONSTRAINT cpf_medico_pk PRIMARY KEY (cpf_medico)
+    CONSTRAINT agendamentos_pk PRIMARY KEY (cpf_paciente, cpf_medico, dh_consulta),
 );
 
 
@@ -58,6 +57,5 @@ CREATE TABLE MedicoEspecialidades (
     id_especialidade int NOT NULL,
     CONSTRAINT cpf_medico_fk FOREIGN KEY (cpf_medico) REFERENCES Medicos(cpf_pessoa),
     CONSTRAINT id_especialidade_fk FOREIGN KEY (id_especialidade) REFERENCES Especialidades(id),
-    CONSTRAINT cpf_medico_pk PRIMARY KEY (cpf_medico),
-    CONSTRAINT id_especialidade_pk PRIMARY KEY (id_especialidade)
+    CONSTRAINT especialidades_pk PRIMARY KEY (cpf_medico, id_especialidade),
 );
